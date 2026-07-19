@@ -60,7 +60,7 @@ Use os **nomes exatos** como aparecem no fminside (em inglês: `Brazil`, `Italy`
 - Liga → `output/leagues/{liga}/{clube}.json`
 - Liga + nação → `output/leagues/{nacao}/{liga}/{clube}.json`
 
-Esses JSON podem ser importados no Gofoot Studio (aba de atualizar CSV / importar equipas).
+Esses JSON podem ser importados no Gofoot Studio.
 
 ## Problemas comuns
 
