@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>fminside-scraper</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <main class="shell">
+    <header class="hero">
+      <p class="brand">fminside-scraper</p>
+      <h1>Scraping FMInside</h1>
+      <p class="lead">Escolha um clube ou uma liga (+ nação quando o nome da liga se repete). Gera JSON no formato GoFoot Tools.</p>
+    </header>
+
+    <section class="panel">
+      <div class="mode-row" role="radiogroup" aria-label="Modo">
+        <label class="mode">
+          <input type="radio" name="mode" value="club" checked />
+          <span>Clube</span>
+        </label>
+        <label class="mode">
+          <input type="radio" name="mode" value="league" />
+          <span>Liga</span>
+        </label>
+      </div>
+
+      <label class="field" id="nationField">
+        <span>Nação <em id="nationRequired">(opcional)</em></span>
+        <select id="nation">
+          <option value="">— nenhuma —</option>
+        </select>
+        <small>País da competição (não nacionalidade do jogador). Ex.: Brazil + Série A → só Brasileiro Série A</small>
+      </label>
+
+      <label class="field" id="clubField">
+        <span>Nome do clube</span>
+        <input id="clubQuery" type="text" placeholder="Ex: Real Madrid" autocomplete="off" />
+        <small id="clubHint">Digite o nome exato como no fminside.net</small>
+      </label>
+
+      <label class="field" id="leagueField" hidden>
+        <span>Liga</span>
+        <select id="leagueQuery">
+          <option value="">— escolha a liga —</option>
+        </select>
+        <small id="leagueHint">Lista oficial do fminside</small>
+      </label>
+
+      <div class="limits">
+        <label class="field compact">
+          <span>Max páginas (opcional)</span>
+          <input id="maxPages" type="number" min="1" placeholder="∞" />
+        </label>
+        <label class="field compact">
+          <span>Max jogadores (opcional)</span>
+          <input id="maxPlayers" type="number" min="1" placeholder="∞" />
+        </label>
+      </div>
+
+      <div class="actions">
+        <button id="startBtn" type="button">Iniciar scraping</button>
+        <button id="refreshCatalog" type="button" class="ghost">Atualizar listas</button>
+      </div>
+    </section>
+
+    <section class="panel status-panel" hidden id="statusPanel">
+      <div class="status-head">
+        <strong id="statusTitle">Aguardando…</strong>
+        <span id="statusBadge" class="badge">queued</span>
+      </div>
+      <p id="statusMsg" class="status-msg"></p>
+      <div class="progress">
+        <div id="progressBar" class="progress-bar"></div>
+      </div>
+      <p id="progressText" class="muted"></p>
+      <ul id="fileList" class="files"></ul>
+      <pre id="logBox" class="log"></pre>
+    </section>
+  </main>
+  <script src="/static/app.js"></script>
+</body>
+</html>
