@@ -1,6 +1,6 @@
-# fminside-scraper — FMInside → GoFoot
+# fminside-scraper — FMInside → Gofoot
 
-Ferramenta local para extrair jogadores do [fminside.net](https://fminside.net) e gerar JSON no formato do **GoFoot Tools**.
+Ferramenta local para extrair jogadores do [fminside.net](https://fminside.net) e gerar JSON no formato do **Gofoot Studio**.
 
 ## O que você precisa ter instalado
 
@@ -60,7 +60,7 @@ Use os **nomes exatos** como aparecem no fminside (em inglês: `Brazil`, `Italy`
 - Liga → `output/leagues/{liga}/{clube}.json`
 - Liga + nação → `output/leagues/{nacao}/{liga}/{clube}.json`
 
-Esses JSON podem ser importados no GoFoot Tools (aba de atualizar CSV / importar equipas).
+Esses JSON podem ser importados no Gofoot Studio (aba de atualizar CSV / importar equipas).
 
 ## Problemas comuns
 

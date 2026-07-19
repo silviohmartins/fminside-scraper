@@ -10,6 +10,7 @@ from fminside.http import ResilientHttpClient
 from fminside.models import Jogador
 from fminside.parse import (
     agregar_notas_formulario,
+    calibrar_notas_ao_ca,
     eh_jogador_feminino,
     extrair_abilities,
     extrair_atributos_brutos,
@@ -53,6 +54,10 @@ class PlayerProfileScraper:
             (posicoes.split(",")[0].strip().upper() == "G") if posicoes else False
         )
         notas = agregar_notas_formulario(attrs, pa, eh_goleiro)
+        posicao_grupo = (
+            posicoes.split(",")[0].strip().upper() if posicoes else None
+        )
+        notas = calibrar_notas_ao_ca(notas, posicao_grupo, ca)
 
         clube = info.get("Club", "")
         if not clube:

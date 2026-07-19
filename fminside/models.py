@@ -3,34 +3,67 @@ from __future__ import annotations
 from dataclasses import asdict, dataclass
 from typing import Optional
 
-
-ATTR_TECNICA = ("Technique", "First Touch", "Dribbling", "Passing", "Crossing")
-ATTR_ATAQUE = ("Finishing", "Long Shots", "Heading", "Off the Ball", "Composure")
-ATTR_DEFESA = ("Tackling", "Marking", "Positioning", "Heading", "Aggression", "Bravery")
-ATTR_FISICO = (
-    "Acceleration",
-    "Pace",
-    "Stamina",
-    "Strength",
-    "Agility",
-    "Balance",
-    "Jumping Reach",
-    "Natural Fitness",
-)
-ATTR_MENTAL = (
-    "Anticipation",
-    "Decisions",
-    "Concentration",
-    "Determination",
-    "Vision",
-    "Teamwork",
-    "Work Rate",
-    "Flair",
-)
-ATTR_REFLEXOS = ("Reflexes", "Handling")
-ATTR_POS_GK = ("Command of Area", "Communication", "Positioning")
-ATTR_AEREO = ("Aerial Reach",)
-ATTR_SAIDA = ("Kicking", "Throwing", "Rushing Out (Tendency)", "One on Ones")
+# Pesos por atributo-chave (estilo FM). Soma ~1.0 por grupo; media_grupo normaliza.
+ATTR_TECNICA: dict[str, float] = {
+    "Technique": 0.25,
+    "Passing": 0.25,
+    "First Touch": 0.25,
+    "Dribbling": 0.15,
+    "Crossing": 0.10,
+}
+ATTR_ATAQUE: dict[str, float] = {
+    "Finishing": 0.25,
+    "Off the Ball": 0.25,
+    "Composure": 0.25,
+    "Long Shots": 0.15,
+    "Heading": 0.10,
+}
+ATTR_DEFESA: dict[str, float] = {
+    "Tackling": 0.22,
+    "Marking": 0.22,
+    "Positioning": 0.22,
+    "Aggression": 0.12,
+    "Bravery": 0.12,
+    "Heading": 0.10,
+}
+ATTR_FISICO: dict[str, float] = {
+    "Acceleration": 0.16,
+    "Pace": 0.16,
+    "Stamina": 0.16,
+    "Strength": 0.16,
+    "Agility": 0.12,
+    "Balance": 0.12,
+    "Jumping Reach": 0.06,
+    "Natural Fitness": 0.06,
+}
+ATTR_MENTAL: dict[str, float] = {
+    "Anticipation": 0.15,
+    "Decisions": 0.15,
+    "Vision": 0.15,
+    "Concentration": 0.15,
+    "Determination": 0.12,
+    "Teamwork": 0.12,
+    "Work Rate": 0.12,
+    "Flair": 0.04,
+}
+ATTR_REFLEXOS: dict[str, float] = {
+    "Reflexes": 0.65,
+    "Handling": 0.35,
+}
+ATTR_POS_GK: dict[str, float] = {
+    "Positioning": 0.40,
+    "Command of Area": 0.40,
+    "Communication": 0.20,
+}
+ATTR_AEREO: dict[str, float] = {
+    "Aerial Reach": 1.0,
+}
+ATTR_SAIDA: dict[str, float] = {
+    "One on Ones": 0.35,
+    "Rushing Out (Tendency)": 0.35,
+    "Kicking": 0.15,
+    "Throwing": 0.15,
+}
 
 POSICAO_FORMULARIO = {
     "GK": "G",
@@ -49,6 +82,7 @@ POSICAO_FORMULARIO = {
     "ST": "CA",
 }
 
+# Pesos que o Gofoot usa ao recalcular OVER a partir das notas de grupo.
 OVER_WEIGHTS = {
     "G": {"REF": 0.20, "POS": 0.20, "AER": 0.20, "SAI": 0.20, "MEN": 0.20},
     "Z": {"TEC": 0.15, "ATA": 0.05, "DEF": 0.40, "FIS": 0.25, "MEN": 0.15},
@@ -58,6 +92,19 @@ OVER_WEIGHTS = {
     "PD": {"TEC": 0.25, "ATA": 0.40, "DEF": 0.05, "FIS": 0.15, "MEN": 0.15},
     "PE": {"TEC": 0.25, "ATA": 0.40, "DEF": 0.05, "FIS": 0.15, "MEN": 0.15},
     "CA": {"TEC": 0.20, "ATA": 0.40, "DEF": 0.05, "FIS": 0.20, "MEN": 0.15},
+}
+
+# Mapeamento nota interna → chave de peso OVER.
+NOTA_PARA_OVER_KEY = {
+    "Tecnica": "TEC",
+    "Ataque": "ATA",
+    "Defesa": "DEF",
+    "Fisico": "FIS",
+    "Mental": "MEN",
+    "Reflexos": "REF",
+    "Posicionamento": "POS",
+    "JogoAereo": "AER",
+    "SaidaDeBola": "SAI",
 }
 
 PE_LETRA = {"Direito": "D", "Esquerdo": "E", "Ambidestro": "A"}
@@ -99,32 +146,3 @@ class Jogador:
 
     def eh_goleiro(self) -> bool:
         return self.posicao_grupo() == "G"
-
-    def calcular_overall(self) -> Optional[int]:
-        grupo = self.posicao_grupo()
-        pesos = OVER_WEIGHTS.get(grupo or "")
-        if not pesos:
-            return None
-        if self.eh_goleiro():
-            valores = {
-                "REF": self.Reflexos,
-                "POS": self.Posicionamento,
-                "AER": self.JogoAereo,
-                "SAI": self.SaidaDeBola,
-                "MEN": self.Mental,
-            }
-        else:
-            valores = {
-                "TEC": self.Tecnica,
-                "ATA": self.Ataque,
-                "DEF": self.Defesa,
-                "FIS": self.Fisico,
-                "MEN": self.Mental,
-            }
-        total = 0.0
-        for chave, peso in pesos.items():
-            v = valores.get(chave)
-            if v is None:
-                return None
-            total += float(v) * peso
-        return int(round(total))

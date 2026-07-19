@@ -18,6 +18,8 @@ from fminside.models import (
     ATTR_REFLEXOS,
     ATTR_SAIDA,
     ATTR_TECNICA,
+    NOTA_PARA_OVER_KEY,
+    OVER_WEIGHTS,
     POSICAO_FORMULARIO,
 )
 
@@ -134,11 +136,18 @@ def extrair_atributos_brutos(soup: BeautifulSoup) -> dict[str, int]:
     return attrs
 
 
-def media_grupo(attrs: dict[str, int], chaves: tuple[str, ...]) -> Optional[int]:
-    valores = [attrs[k] for k in chaves if k in attrs]
-    if not valores:
+def media_grupo(attrs: dict[str, int], pesos: dict[str, float]) -> Optional[int]:
+    """Média ponderada normalizada; só atributos presentes no perfil contam."""
+    numerador = 0.0
+    denominador = 0.0
+    for nome, peso in pesos.items():
+        if nome not in attrs or peso <= 0:
+            continue
+        numerador += float(attrs[nome]) * peso
+        denominador += peso
+    if denominador <= 0:
         return None
-    return int(round(sum(valores) / len(valores)))
+    return int(round(numerador / denominador))
 
 
 def agregar_notas_formulario(
@@ -172,6 +181,81 @@ def agregar_notas_formulario(
         "Mental": mental,
         "Talento": potencial,
     }
+
+
+def _over_sintetico(
+    notas: dict[str, Optional[int]],
+    pesos: dict[str, float],
+) -> Optional[float]:
+    total = 0.0
+    for nome_nota, chave in NOTA_PARA_OVER_KEY.items():
+        peso = pesos.get(chave)
+        if peso is None:
+            continue
+        valor = notas.get(nome_nota)
+        if valor is None:
+            return None
+        total += float(valor) * peso
+    return total
+
+
+def _clamp_nota(valor: float) -> int:
+    return max(1, min(99, int(round(valor))))
+
+
+def calibrar_notas_ao_ca(
+    notas: dict[str, Optional[int]],
+    posicao_grupo: Optional[str],
+    ability_atual: Optional[int],
+) -> dict[str, Optional[int]]:
+    """Escala as notas de grupo para o OVER do Gofoot ≈ CA do FMInside.
+
+    O Gofoot sobrescreve OVER com média ponderada por posição; sem calibração
+    o overall visual fica sistematicamente abaixo do CA.
+    """
+    if ability_atual is None or not posicao_grupo:
+        return notas
+    pesos = OVER_WEIGHTS.get(posicao_grupo)
+    if not pesos:
+        return notas
+
+    sintetico = _over_sintetico(notas, pesos)
+    if sintetico is None or sintetico <= 0:
+        return notas
+
+    fator = float(ability_atual) / sintetico
+    calibradas = dict(notas)
+    for nome_nota, chave in NOTA_PARA_OVER_KEY.items():
+        if chave not in pesos:
+            continue
+        valor = notas.get(nome_nota)
+        if valor is None:
+            continue
+        calibradas[nome_nota] = _clamp_nota(float(valor) * fator)
+
+    # Ajuste fino por arredondamento: sobe/desce a nota de maior peso.
+    chave_principal = max(pesos.items(), key=lambda kv: kv[1])[0]
+    nome_principal = next(
+        (n for n, k in NOTA_PARA_OVER_KEY.items() if k == chave_principal),
+        None,
+    )
+    if nome_principal is None or calibradas.get(nome_principal) is None:
+        return calibradas
+
+    for _ in range(6):
+        atual = _over_sintetico(calibradas, pesos)
+        if atual is None:
+            break
+        diff = ability_atual - int(round(atual))
+        if diff == 0:
+            break
+        passo = 1 if diff > 0 else -1
+        novo = int(calibradas[nome_principal]) + passo  # type: ignore[arg-type]
+        if novo < 1 or novo > 99:
+            break
+        calibradas[nome_principal] = novo
+
+    return calibradas
 
 
 def parse_valor_euros(texto: str) -> Optional[int]:

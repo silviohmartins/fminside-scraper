@@ -11,7 +11,7 @@ from fminside.pipeline import ScrapeFilters, run_scrape
 
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
-        description="Scraper FMInside → JSON GoFoot (por clube ou liga).",
+        description="Scraper FMInside → JSON Gofoot (por clube ou liga).",
     )
     g = p.add_mutually_exclusive_group(required=True)
     g.add_argument("--club", help='Nome exato do clube no fminside (ex: "Real Madrid")')

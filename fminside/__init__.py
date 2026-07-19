@@ -1,4 +1,4 @@
-"""Pacote de scraping do fminside-scraper (FMInside → GoFoot Tools)."""
+"""Pacote de scraping do fminside-scraper (FMInside → Gofoot Studio)."""
 
 from fminside.models import Jogador
 from fminside.pipeline import ScrapeFilters, run_scrape

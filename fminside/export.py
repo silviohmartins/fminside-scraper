@@ -9,7 +9,7 @@ from fminside.parse import slugify
 
 
 def jogador_para_gofoot(j: Jogador) -> dict:
-    """Formato montarExportGoFoot do GoFoot Tools."""
+    """Formato de exportação do Gofoot Studio."""
     pe = PE_LETRA.get(j.PePreferido)
     saida: dict = {
         "id": f"fm_{j.FmId}" if j.FmId is not None else None,
@@ -54,7 +54,7 @@ def jogador_para_gofoot(j: Jogador) -> dict:
         "avatar_tattoo": None,
         "avatar_tattoo_color": None,
         "avatar_tattoo_white_mix": None,
-        "OVER": j.calcular_overall(),
+        "OVER": j.AbilityAtual,
         "_url": j.Url,
         "_fm_id": j.FmId,
         "_clube": j.Clube,
